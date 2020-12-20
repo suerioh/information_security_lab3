@@ -178,6 +178,7 @@ def time_protocol(len_k, len_c):
     return end - start
 
 '''
+# THIS IS  DONE JUST FOR COMPUTING THE .npy FILE -> TOO LONG IN ORDER TO COMPUTE EVERY TIME
 # fill a matrix to compute a countout plot
 time_protocol_arr = np.zeros((256, 256))
 # computing ideal capacity matrix based on different values of epsilon and delta
@@ -189,13 +190,33 @@ for i in tqdm(range (1, 256)):
 np.save('arr_task1', time_protocol_arr)
 '''
 
-# load the array
+# load the .npy file in a np array
 time_protocol_arr = np.load('arr_task1.npy')
 
 
-# countour plot
-max_time = np.amax(time_protocol_arr)
+'''
+# the linear tren is real just for high intervals of lk values
+meme = np.zeros(10000)
+for i in range(1, 10000):
+    meme[i] = time_protocol(i, 8)
+'''
 
+
+# plots for different len of c
+ticks_arr = np.arange(0, 256, step=16)
+for x in range(16):
+    plt.plot(time_protocol_arr[:][x])
+
+plt.xticks(ticks_arr)
+plt.title('computational complexity of a legitimate protocol run')
+plt.xlabel('key length')
+plt.ylabel('protocol time')
+plt.show()
+
+
+
+# countour plot
+max_time = np.amax(time_protocol_arr) # getting nice levels
 lengths_arr = np.arange(0, 256, step=1)
 ticks_arr = np.arange(0, 256, step=8)
 levels = np.arange(0, max_time, step=0.0001)
@@ -207,22 +228,4 @@ plt.title('computational complexity of a legitimate protocol run')
 plt.xlabel('key length')
 plt.ylabel('challenge length')
 plt.colorbar()
-plt.show()
-
-
-
-# fill a matrix to compute a linear plot
-time_protocol_arr_linear = np.zeros(256,)
-# computing ideal capacity matrix based on different values of epsilon and delta
-for i in range (0, 256):
-    time_protocol_arr_linear[i] = time_protocol(16, i)
-
-
-# linear plot 
-ticks_arr = np.arange(0, 256, step=16)
-plt.plot(time_protocol_arr_linear)
-plt.xticks(ticks_arr)
-plt.title('computational complexity of a legitimate protocol run')
-plt.xlabel('challenge length')
-plt.ylabel('protocol time')
 plt.show()
