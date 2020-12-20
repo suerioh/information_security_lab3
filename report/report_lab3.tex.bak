@@ -1,0 +1,110 @@
+\documentclass{report}
+\usepackage{cite}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage[english]{babel}
+\usepackage{caption}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usetikzlibrary{calc}
+\usetikzlibrary{arrows}
+\usepackage{pgfplots}
+\captionsetup[figure]{font=small}	
+\captionsetup[table]{font=footnotesize}
+\newcommand{\R}{\mathbb{R}}
+\usepackage{float}
+\tolerance=1
+\emergencystretch=\maxdimen
+\hyphenpenalty=10000
+\hbadness=10000
+\usepackage{array}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{mathtools}
+
+\begin{document}
+
+
+\begin{titlepage}
+\begin{center}
+\vspace*{0.8cm}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{logo_uni}
+\end{figure}
+\LARGE{\textsc{University of Padua}}\\
+\vspace*{0.1cm}
+\Large{\textsc{Department of Information Engineering}}\\
+\vspace*{1.8cm}
+\Large{\textsc{Information Security Report}}\\
+\vspace*{0.1cm}
+\Large{\textsc{Team Blue}}\\
+\vspace*{0.8cm}
+\huge{\textbf{Implementation and weakness evaluatation of a challenge-response scheme for entity authentication}}\\
+\vspace*{1cm}
+\end{center}
+\large{\textit{Authors:}}
+\hfill
+\large{\textit{Teacher:}} \\
+\large{Sara \textsc{Bardi}}
+\hfill
+\large{Nicola \textsc{Laurenti}}\\
+\large{Simone \textsc{Favaro}}\\
+\large{Alessandro \textsc{Rizzo}}\\
+
+\begin{center}
+\large{20th December 2020}\\
+\end{center}
+\end{titlepage}
+\pagebreak
+
+
+
+
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+
+
+
+\begingroup
+\let\clearpage\relax
+\chapter*{Abstract}
+\endgroup
+
+
+
+
+
+
+\begingroup
+\let\clearpage\relax
+\chapter*{General settings}
+\endgroup
+
+
+
+
+
+\chapter*{Task implementation}
+\section*{Task 1 - Implement the uniform error channel}
+ 
+
+
+
+
+\section*{Task 2 - Implement the random binning encoder}
+
+
+
+
+
+\section*{Task 3 - - Implement the random binning encoder}
+
+
+
+
+
+\end{document}
+
