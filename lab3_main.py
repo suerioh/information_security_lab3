@@ -1,231 +1,112 @@
 import numpy as np
-import timeit
 import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+from utils import str_to_bin_array, bin_array_to_str, bin_array_to_int, sum_dec_digits, r_calc
+from task1 import setup, step1, step2, step3, step4
 
 
 
 
-
-# ----------- UTILS -----------
-# converts strings like '0100101' into numpy arrays, where each entry is a different value
-def str_to_bin_array(s):
-	a = np.array(list(s), dtype=int)
-	return a
+def main():
 
 
-# opposite of str_to_bin_array
-def bin_array_to_str(a):
-	b = ''
-	for x in a:
-		b += str(x)
-	return b
+    # ----------- TESTING THE PROTOCOL -----------
+    # testing protocol steps with: n = 0, lc = lk = 8 
 
+    print('-------- SETUP --------')
+    n_init, key = setup(0, 8) 
+    print('n initial value =', n_init)
+    print('key value =', key)
 
-# converts a np bin array to an int
-def bin_array_to_int(a):
-    return int(bin_array_to_str(a), 2)
+    print('\n-------- STEP 1 --------')
+    u1 = step1()
+    print('u1 =', u1)
 
+    print('\n-------- STEP 2 --------')
+    u2 = step2(8)
+    print('u2 = ' + '(' + bin_array_to_str(u2[0]) + ', ' + str(u2[1]) + ')')
 
-# sum decimal digits of a decimal integer
-def sum_dec_digits(a):
-    a = str(a)
-    s = 0
-    for x in a:
-        s = s + int(x)
-    return s
+    print('\n-------- STEP 3 --------')
+    r_computed = step3()
+    print('u3 =', r_computed)
 
-
-# r computaton starting from the key, challenge and counter
-def r_calc(k, c, n):
-    # takes as input k and c np arrays and n integer
-    c = bin_array_to_str(c)
-    sc = sum_dec_digits(c)
-    k = int(bin_array_to_str(k))
-    t = k + n
-    st = sum_dec_digits(t)
-    s = st * sc
-    return int(bin(s)[2:])
-
-
-
-
-
-
-# ----------- INIT -----------
-# A and B have a dictionary which contains protocol parameters and values they exchange each other 
-A = {'key' : None, 'challenge' : None, 'n_counter' : None, 'id_A' : None , 'u2' : None, 'r' : None}
-B = {'key' : None, 'challenge' : None, 'n_counter' : None, 'id_A' : None , 'u2' : None, 'r' : None}
-
-
-# ----------- PROTOCOL -----------
-# setup init the key and challenge length and the initial value of the counter
-def setup(n, lk):
-    k = np.random.randint(0, 2, lk, dtype=int)
-    # update key value in each dictionary
-    A['key'] = k
-    B['key'] = k
-    # store n inside B dictionaty
-    B['n_counter'] = n
-    # also A generate its identity idA as a single random bit
-    idA = np.random.randint(0, 2, 1, dtype=int)
-    # A stores idA in its dictionary
-    A['id_A'] = idA
-    return bin_array_to_str(idA), bin_array_to_str(k)
-
-
-# step 1 -> A sends B its id
-def step1():
-    # B get the idA
-    B['id_A'] = A.get('id_A')
-    u1 = B.get('id_A')
-    # print('u1 =', u1)
-    return bin_array_to_str(u1)
-
-
-# step 2 -> B sends to B a challenge and the counter value
-def step2(lc):
-    # B generates a random challenge, update the counter and store them in its dictionary
-    c = np.random.randint(0, 2, lc, dtype=int)
-    B['challenge'] = c
-    B['n_counter'] += 1
-    # B computes u2, stores it and sends it to A
-    B['u2'] = [B.get('challenge'), B.get('n_counter')]
-    # A gets u2 and store it in its dictionary
-    u2 = B.get('u2')
-    A['u2'] = u2
-    # print('u2 = ', u2)
-    return u2
-
-
-# step 3 -> A computes r and sent it to B
-def step3():
-    # A extract c and n from u2 and store them in the dictionary
-    A['challenge'] = A.get('u2')[0]
-    A['n_counter'] = A.get('u2')[1]
-    # u3 computation using the r_calc util method
-    r = r_calc(A.get('key'), A.get('challenge'), A.get('n_counter'))
-    A['r'] = r
-    # print('u3 =', r)
-    return str(r)
-    
-
-# step 4 -> B compares r with the expected response r^
-def step4():
-    # B receive the u3 = r
-    B['r'] = A.get('r')
-    # B compute the expected response using its values
-    r_exp = r_calc(B.get('key'), B.get('challenge'), B.get('n_counter'))
-    '''
-    if r_exp == B.get('r'):
-        print('authentication accepted')
+    print('\n-------- STEP 4 --------')
+    r_expected = step4()
+    if r_expected == r_computed:
+            print('authentication accepted')
     else:
         print('authentication rejected')
-    '''
-    return str(r_exp)
 
 
 
 
+    # ----------- PLOT TASK 1 -----------
+    # this method compute the total protocol time for specific lengths of c and k (the n init is always 0)
+    def time_protocol(len_k, len_c):
+        start = time.time()
+
+        _, _ = setup(0, len_k)
+        _ = step1()
+        _ = step2(len_c)
+        _ = step3()
+        step4()
+
+        end = time.time()
+        
+        # computing time and returning it, a scalar is returned
+        return end - start
 
 
-# ----------- TESTING THE PROTOCOL -----------
-# testing with n = 0, lc = lk = 8 
+    # compute an array which contains protocol time for the first len_k keys and for a fixed len_c 
+    def get_time(len_k, len_c):
+        time_arr = np.zeros(len_k)
 
-print('-------- SETUP --------')
-n_init, key = setup(0, 8) 
-print('n initial value =', n_init)
-print('key value =', key)
+        # for each iteration i use the time_procol method to compute the protocol time
+        for i in tqdm(range(1, len_k)):
+            time_arr[i] = time_protocol(i, len_c)
 
-print('\n-------- STEP 1 --------')
-u1 = step1()
-print('u1 =', u1)
-
-print('\n-------- STEP 2 --------')
-u2 = step2(8)
-print('u2 = ' + '(' + bin_array_to_str(u2[0]) + ', ' + str(u2[1]) + ')')
-
-print('\n-------- STEP 3 --------')
-r_computed = step3()
-print('u3 =', r_computed)
-
-print('\n-------- STEP 4 --------')
-r_expected = step4()
-if r_expected == r_computed:
-        print('authentication accepted')
-else:
-    print('authentication rejected')
-
-
+        # a np array is returned
+        return time_arr
 
 
 
+    # save array computed using the get_time method in order not to calculate it every script run
+    # np.save('time_arr_lc_1024', get_time(10000, 1024))
 
-# ----------- PLOT TASK 1 -----------
-# this method compute the protocol time for specific lengths of c and k
-def time_protocol(len_k, len_c):
-    start = time.time()
+    # this is useful for the following interpolations
+    x_values = np.arange(0, 10000, step=1)
 
-    _, _ = setup(0, len_k)
-    _ = step1()
-    _ = step2(len_c)
-    _ = step3()
-    step4()
+    # loading the protocol times for lc = 8, and find the linear interpolation of degree 1 
+    arr_plot1 = np.load('time_arr_lc_8.npy')
+    m1, b1 = np.polyfit(x_values, arr_plot1, 1)
 
-    end = time.time()
-    return end - start
+    # loading the protocol times for lc = 256, and find the linear interpolation of degree 1 
+    arr_plot2 = np.load('time_arr_lc_256.npy')
+    m2, b2 = np.polyfit(x_values, arr_plot2, 1)
 
-'''
-# THIS IS  DONE JUST FOR COMPUTING THE .npy FILE -> TOO LONG IN ORDER TO COMPUTE EVERY TIME
-# fill a matrix to compute a countout plot
-time_protocol_arr = np.zeros((256, 256))
-# computing ideal capacity matrix based on different values of epsilon and delta
-for i in tqdm(range (1, 256)):
-    for j in range(256):
-        time_protocol_arr[i, j] = time_protocol(i, j)
-
-# save array 
-np.save('arr_task1', time_protocol_arr)
-'''
-
-# load the .npy file in a np array
-time_protocol_arr = np.load('arr_task1.npy')
+    # loading the protocol times for lc = 1024, and find the linear interpolation of degree 1 
+    arr_plot3 = np.load('time_arr_lc_1024.npy')
+    m3, b3 = np.polyfit(x_values, arr_plot3, 1)
 
 
-'''
-# the linear tren is real just for high intervals of lk values
-meme = np.zeros(10000)
-for i in range(1, 10000):
-    meme[i] = time_protocol(i, 8)
-'''
+    # actual plotting of raw data and the corresponding linear interpolations
+    plt.plot(arr_plot1, label='raw lc = 8', alpha=0.3, c='b')
+    plt.plot((np.inner(m1, x_values)) + b1, label='interpol lc = 8', alpha=1, c='b')
+
+    plt.plot(arr_plot2, label='raw lc = 256', alpha=0.3, c='g')
+    plt.plot((np.inner(m2, x_values)) + b2, label='interpol lc = 256', alpha=1, c='g')
+
+    plt.plot(arr_plot3, label='raw lc = 1024', alpha=0.3, c='r')
+    plt.plot((np.inner(m3, x_values)) + b3, label='interpol lc = 1024', alpha=1, c='r')
+
+    plt.title('computational complexity of a legitimate protocol run for different key length')
+    plt.xlabel('key length')
+    plt.ylabel('protocol time')
+    plt.legend()
+    plt.show()
 
 
-# plots for different len of c
-ticks_arr = np.arange(0, 256, step=16)
-for x in range(16):
-    plt.plot(time_protocol_arr[:][x])
-
-plt.xticks(ticks_arr)
-plt.title('computational complexity of a legitimate protocol run')
-plt.xlabel('key length')
-plt.ylabel('protocol time')
-plt.show()
-
-
-
-# countour plot
-max_time = np.amax(time_protocol_arr) # getting nice levels
-lengths_arr = np.arange(0, 256, step=1)
-ticks_arr = np.arange(0, 256, step=8)
-levels = np.arange(0, max_time, step=0.0001)
-plt.contour(lengths_arr, lengths_arr, time_protocol_arr, levels, linewidths=1, cmap='RdYlGn')
-n_label = lengths_arr
-plt.xticks(ticks_arr)
-plt.yticks(ticks_arr)
-plt.title('computational complexity of a legitimate protocol run')
-plt.xlabel('key length')
-plt.ylabel('challenge length')
-plt.colorbar()
-plt.show()
+if __name__ == "__main__":
+    main()
