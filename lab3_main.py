@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from utils import str_to_bin_array, bin_array_to_str, bin_array_to_int, sum_dec_digits, r_calc
-from task1 import setup, step1, step2, step3, step4, get_time
+from task1 import setup, step1, step2, step3, step4
 
 
 
@@ -57,6 +57,19 @@ def main():
         
         # computing time and returning it, a scalar is returned
         return end - start
+
+
+    # compute an array which contains protocol time for the first len_k keys and for a fixed len_c 
+    def get_time(len_k, len_c):
+        time_arr = np.zeros(len_k)
+
+        # for each iteration i use the time_procol method to compute the protocol time
+        for i in tqdm(range(1, len_k)):
+            time_arr[i] = time_protocol(i, len_c)
+
+        # a np array is returned
+        return time_arr
+
 
 
     # save array computed using the get_time method in order not to calculate it every script run
